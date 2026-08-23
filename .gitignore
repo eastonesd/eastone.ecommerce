@@ -1,0 +1,6 @@
+node_modules/
+dist-electron/
+mobile/android/app/build/
+mobile/ios/App/build/
+*.log
+.DS_Store

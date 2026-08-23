@@ -1,0 +1,42 @@
+name: iOS Build Check (simulator, unsigned)
+
+# Prerequisite (run once locally on a Mac and commit the result):
+#   cd mobile && npm install && npx cap add ios && npx cap sync ios
+#
+# This workflow only proves the app compiles for the iOS Simulator.
+# It does NOT produce an App Store build — that requires an Apple
+# Developer account, signing certificates, and provisioning profiles,
+# which have to be configured in Xcode (or fastlane) yourself.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "web/**"
+      - "mobile/**"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install JS dependencies
+        working-directory: mobile
+        run: npm install
+
+      - name: Sync web assets into native project
+        working-directory: mobile
+        run: npx cap sync ios
+
+      - name: Build for iOS Simulator (no signing)
+        working-directory: mobile/ios/App
+        run: |
+          xcodebuild -workspace App.xcworkspace -scheme App \
+            -sdk iphonesimulator -configuration Debug \
+            CODE_SIGNING_ALLOWED=NO build
