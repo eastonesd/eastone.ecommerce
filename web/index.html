@@ -8,6 +8,11 @@
 <link rel="icon" href="./assets/logo/icons/logo-64.png">
 <link rel="apple-touch-icon" href="./assets/logo/icons/logo-180.png">
 <link rel="manifest" href="./manifest.json">
+<!-- iOS "加入主畫面" 相關設定：讓網頁能像 App 一樣全螢幕啟動 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="香格里拉">
+<meta name="mobile-web-app-capable" content="yes">
 <title>香格里拉：虛實邊界 · Shangri-La: Realistic Frontier</title>
 <style>
   :root{
@@ -1072,6 +1077,14 @@ requestAnimationFrame(animate);
 window.addEventListener('visibilitychange', ()=>{ if(document.hidden && state.started) saveGame(true); });
 
 })();
+</script>
+<script>
+  // 讓 iOS / Android 都能「加入主畫面」離線啟動
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{
+      navigator.serviceWorker.register('./sw.js').catch(()=>{});
+    });
+  }
 </script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 {
   "name": "shangri-la-frontier-mobile",
   "version": "0.1.0",
-  "description": "Shangri-La: Realistic Frontier — iOS/Android wrapper (Capacitor)",
+  "description": "Shangri-La: Realistic Frontier — Android native wrapper (Capacitor). iOS uses the PWA instead — see root README. The @capacitor/ios bits below are optional, only needed if you decide to build a native iOS app later.",
   "scripts": {
     "add:android": "npx cap add android",
     "add:ios": "npx cap add ios",

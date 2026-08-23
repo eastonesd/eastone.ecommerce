@@ -3,7 +3,7 @@
   "short_name": "香格里拉",
   "description": "探索、採集、建造，在虛實交界的島嶼上生存下去。",
   "start_url": "./index.html",
-  "display": "fullscreen",
+  "display": "standalone",
   "orientation": "landscape",
   "background_color": "#0b1330",
   "theme_color": "#2c2313",
