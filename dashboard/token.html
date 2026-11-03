@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Threads 授權</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#ee4d2d">
+<style>
+:root{--bg:#f6f4f1;--panel:#fff;--ink:#1d1b19;--muted:#7a736c;--line:#e7e2dc;--accent:#ee4d2d;--good:#1f9d6b}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#141210;--panel:#1d1a17;--ink:#f1ece6;--muted:#9a918a;--line:#2e2a26;--accent:#ff6a45;--good:#3ccf91}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,"Noto Sans TC",sans-serif}
+main{max-width:640px;margin:0 auto;padding:32px 16px 60px}
+h1{font-size:20px;margin:0 0 4px} h1 b{color:var(--accent)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px}
+.step{font-size:12px;color:var(--accent);font-weight:700;letter-spacing:.5px}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+input,code.box{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:14px ui-monospace,monospace;word-break:break-all;display:block}
+button,a.btn{display:inline-block;margin-top:12px;border:0;background:var(--accent);color:#fff;border-radius:10px;padding:9px 16px;font:inherit;cursor:pointer;text-decoration:none}
+p{margin:8px 0} .muted{color:var(--muted);font-size:13px} .ok{color:var(--good)}
+ol{padding-left:20px;margin:8px 0}
+</style>
+</head>
+<body>
+<main>
+  <h1><b>shopee</b>.robot · Threads 授權</h1>
+  <p class="muted">這一頁只負責取得「授權碼」，不會碰到你的 App Secret 或 token。</p>
+
+  <section class="card" id="start">
+    <div class="step">STEP 1</div>
+    <p>先在 Meta 開發者後台把下面這個網址加入 <b>Threads 設定 → 重新導向回呼網址</b>：</p>
+    <code class="box" id="redirect"></code>
+    <label for="appid">Threads 應用程式編號（Threads App ID，不是 Facebook App ID）</label>
+    <input id="appid" inputmode="numeric" placeholder="例如 1234567890123456">
+    <button id="go">前往 Threads 授權</button>
+  </section>
+
+  <section class="card" id="done" hidden>
+    <div class="step">STEP 2</div>
+    <p class="ok">✓ 授權完成，這是你的授權碼（1 小時內有效、只能用一次）：</p>
+    <code class="box" id="code"></code>
+    <button id="copy">複製授權碼</button>
+    <p style="margin-top:16px"><b>擇一把它換成長效 token：</b></p>
+    <ol>
+      <li><b>GitHub 上（推薦）</b>：repo → Actions → <b>threads-token</b> → Run workflow → 貼上授權碼。token 會自動寫進 Secrets。</li>
+      <li><b>自己的電腦</b>：<code>npm run token -- 授權碼</code></li>
+    </ol>
+  </section>
+
+  <section class="card" id="err" hidden><p id="errmsg"></p></section>
+</main>
+<script>
+const SCOPES = "threads_basic,threads_content_publish,threads_manage_replies,threads_manage_insights";
+const redirect = location.origin + location.pathname;
+const $ = id => document.getElementById(id);
+$("redirect").textContent = redirect;
+try{ $("appid").value = localStorage.getItem("threads-app-id") || ""; }catch{}
+
+const q = new URLSearchParams(location.search);
+if(q.get("code")){
+  $("start").hidden = true; $("done").hidden = false;
+  $("code").textContent = q.get("code").replace(/#_$/, "");
+  history.replaceState(null, "", location.pathname);
+}
+if(q.get("error")){
+  $("err").hidden = false;
+  $("errmsg").textContent = "授權失敗：" + (q.get("error_description") || q.get("error"));
+}
+
+$("go").onclick = () => {
+  const id = $("appid").value.trim();
+  if(!/^\d{6,}$/.test(id)) return alert("請輸入數字格式的 Threads App ID");
+  try{ localStorage.setItem("threads-app-id", id); }catch{}
+  location.href = "https://threads.net/oauth/authorize?" + new URLSearchParams({
+    client_id: id, redirect_uri: redirect, scope: SCOPES, response_type: "code" });
+};
+$("copy").onclick = async e => {
+  try{ await navigator.clipboard.writeText($("code").textContent); e.target.textContent = "已複製 ✓"; }catch{}
+};
+</script>
+</body>
+</html>

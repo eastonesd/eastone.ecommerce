@@ -1,7 +1,11 @@
 {
-  "updated_at": "2026-11-03T16:34:49.899049+00:00",
-  "mode": "demo",
+  "updated_at": "2026-11-03T17:00:32.401Z",
+  "modes": {
+    "shopee": "demo",
+    "threads": "demo"
+  },
   "total_posts": 28,
-  "total_commission": 1410.0,
-  "total_orders": 9
+  "total_drafts": 3,
+  "total_orders": 10,
+  "total_commission": 840.2
 }

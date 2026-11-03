@@ -2,8 +2,14 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>shopee.robot 儀表板</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#ee4d2d">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="分潤機器人">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -45,6 +51,21 @@ td.name{white-space:normal;min-width:180px}
 .pill{display:inline-block;background:var(--accent-soft);color:var(--accent);border-radius:6px;padding:1px 7px;font-size:12px}
 .good{color:var(--good)} .warn{color:var(--warn)}
 a{color:inherit}
+.wrap{padding-top:max(28px,env(safe-area-inset-top))}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.badge{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;color:var(--muted);background:var(--panel)}
+.badge b{color:var(--ink);font-weight:500}
+#install{display:none;border:0;background:var(--accent);color:#fff;border-radius:999px;padding:4px 14px;font:inherit;font-size:13px;cursor:pointer}
+.drafts{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.draft{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.draft.done{opacity:.45}
+.draft h3{margin:0;font-size:13px;font-weight:700}
+.draft pre{margin:0;white-space:pre-wrap;word-break:break-word;font:inherit;font-size:13px;background:var(--bg);border-radius:8px;padding:10px}
+.draft .lbl{font-size:12px;color:var(--muted)}
+.row{display:flex;gap:6px;flex-wrap:wrap}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:5px 10px;font:inherit;font-size:13px;cursor:pointer}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.hint{font-size:13px;color:var(--muted);margin:0 0 12px}
 </style>
 </head>
 <body>
@@ -52,8 +73,16 @@ a{color:inherit}
   <header>
     <h1><b>shopee</b>.robot</h1>
     <span class="sub" id="updated">載入中…</span>
+    <div class="badges" id="badges"></div>
+    <button id="install">安裝 App</button>
   </header>
-  <div class="banner" id="banner">目前顯示的是示範資料。設定好金鑰並關閉 DRY_RUN 後，這裡會自動換成真實成效。</div>
+  <div class="banner" id="banner">目前顯示的是示範資料。在 queue.yaml 加入商品（或設定好 API 金鑰）後，這裡會自動換成你的資料。</div>
+
+  <section class="card" id="drafts-card" style="margin-bottom:12px;display:none">
+    <h2>待發布草稿 <span class="sub" id="drafts-count"></span></h2>
+    <p class="hint">複製主文發到 Threads，再複製留言貼在自己那篇底下。完成後按「已發布」，這台裝置會記住。</p>
+    <div class="drafts" id="drafts"></div>
+  </section>
 
   <section class="kpis">
     <div class="kpi"><div class="l">累計佣金</div><div class="v" id="k-comm">–</div><div class="d" id="k-comm-d"></div></div>
@@ -109,13 +138,52 @@ async function getJSON(path){ try{ const r = await fetch(path,{cache:"no-store"}
 async function load(){
   let base = "data/";
   let meta = await getJSON(base + "meta.json");
-  if(!meta || !meta.total_posts){ base = "data/demo/"; meta = await getJSON(base + "meta.json"); $("#banner").style.display = "block"; }
-  const [posts, convs, cands] = await Promise.all(["posts","conversions","candidates"].map(f => getJSON(base + f + ".json")));
+  if(!meta || !(meta.total_posts || meta.total_drafts)){ base = "data/demo/"; meta = await getJSON(base + "meta.json"); $("#banner").style.display = "block"; }
+  const [posts, convs, cands, drafts] = await Promise.all(["posts","conversions","candidates","drafts"].map(f => getJSON(base + f + ".json")));
+  renderDrafts(drafts || []);
   render(meta || {}, posts || [], convs || [], cands || {top:[]});
+}
+
+const MODE = { api:"API", queue:"手動佇列", demo:"示範", draft:"草稿" };
+const store = { get(k){ try{ return JSON.parse(localStorage.getItem(k)) || {}; }catch{ return {}; } },
+                set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} } };
+
+function renderDrafts(drafts){
+  if(!drafts.length) return;
+  const done = store.get("drafts-done");
+  const list = [...drafts].reverse();
+  const pending = list.filter(d => !done[d.sub_id]).length;
+  $("#drafts-card").style.display = "block";
+  $("#drafts-count").textContent = `${pending} 份待發布 / 共 ${list.length}`;
+  $("#drafts").innerHTML = list.map(d => `
+    <div class="draft ${done[d.sub_id] ? "done" : ""}" data-id="${esc(d.sub_id)}">
+      <h3>${esc(d.name)}</h3>
+      <div class="row"><span class="pill">${esc(d.keyword||"")}</span><span class="sub">預估 ${nt(d.expected_commission||0)}/篇</span></div>
+      <div class="lbl">主文</div><pre data-k="text">${esc(d.text)}</pre>
+      <div class="lbl">留言（貼在自己的貼文底下）</div><pre data-k="reply">${esc(d.reply)}</pre>
+      <div class="row">
+        <button class="btn primary" data-copy="text">複製主文</button>
+        <button class="btn" data-copy="reply">複製留言</button>
+        <button class="btn" data-done>${done[d.sub_id] ? "改回未發布" : "已發布"}</button>
+      </div>
+    </div>`).join("");
+  $("#drafts").onclick = async e => {
+    const card = e.target.closest(".draft"); if(!card) return;
+    if(e.target.dataset.copy){
+      const txt = card.querySelector(`pre[data-k="${e.target.dataset.copy}"]`).textContent;
+      try{ await navigator.clipboard.writeText(txt); }catch{ const r=document.createRange(); r.selectNodeContents(card.querySelector(`pre[data-k="${e.target.dataset.copy}"]`)); getSelection().removeAllRanges(); getSelection().addRange(r); }
+      const old = e.target.textContent; e.target.textContent = "已複製 ✓"; setTimeout(() => e.target.textContent = old, 1200);
+    }
+    if("done" in e.target.dataset){
+      const d = store.get("drafts-done"); d[card.dataset.id] = !d[card.dataset.id]; store.set("drafts-done", d); renderDrafts(drafts);
+    }
+  };
 }
 
 function render(meta, posts, convs, cands){
   $("#updated").textContent = meta.updated_at ? "最後更新 " + new Date(meta.updated_at).toLocaleString("zh-TW") : "尚無資料";
+  if(meta.modes) $("#badges").innerHTML =
+    `<span class="badge">選品 <b>${MODE[meta.modes.shopee]||meta.modes.shopee}</b></span><span class="badge">發布 <b>${MODE[meta.modes.threads]||meta.modes.threads}</b></span>`;
   const views = posts.reduce((a,p) => a + (p.metrics?.views || 0), 0);
   const comm = convs.reduce((a,c) => a + c.commission, 0);
   const est = posts.reduce((a,p) => a + (p.expected_commission || 0), 0);
@@ -183,6 +251,12 @@ function render(meta, posts, convs, cands){
     <td class="num">${nt(p.expected_commission)}</td><td class="num">${p.score.toFixed(3)}</td></tr>`).join("");
 }
 load();
+
+// ── PWA：離線外殼 + 安裝按鈕 ──
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+let installEvt;
+addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; $("#install").style.display = "inline-block"; });
+$("#install").onclick = async () => { if(!installEvt) return; installEvt.prompt(); await installEvt.userChoice; installEvt = null; $("#install").style.display = "none"; };
 </script>
 </body>
 </html>

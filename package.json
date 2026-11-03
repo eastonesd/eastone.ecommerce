@@ -1,0 +1,21 @@
+{
+  "name": "shopee.robot",
+  "version": "0.2.0",
+  "description": "蝦皮分潤 × Threads 自動化機器人：選品、利潤規劃、發文、儀表板",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "select": "node src/main.js select",
+    "post": "node src/main.js post",
+    "sync": "node src/main.js sync",
+    "run": "node src/main.js run",
+    "demo": "node src/demo.js",
+    "token": "node src/tools/threads-token.js",
+    "dashboard": "npx --yes serve dashboard -l 8000",
+    "test": "node --test \"tests/*.test.js\""
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "yaml": "^2.5.0"
+  }
+}

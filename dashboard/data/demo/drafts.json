@@ -1,0 +1,44 @@
+[
+  {
+    "sub_id": "draft0",
+    "item_id": "demo-保溫瓶-2-0",
+    "name": "【示範】保溫瓶 熱銷款 #200",
+    "keyword": "保溫瓶",
+    "price": 690,
+    "expected_commission": 52.16,
+    "score": 0.9463,
+    "short_link": "https://s.shopee.tw/示範連結",
+    "text": "想找保溫瓶的可以看看這款👇\n示範 保溫瓶 熱銷款 #200\n評分 4.9｜已售 7,258｜約 NT$690\n\n#好物推薦 #蝦皮好物\n#分潤連結 透過連結購買我會獲得少量回饋",
+    "reply": "🔗 商品連結在這：https://s.shopee.tw/示範連結\n（價格與庫存以蝦皮頁面為準）",
+    "created_at": "2026-11-03T17:00:32.377Z",
+    "status": "pending"
+  },
+  {
+    "sub_id": "draft1",
+    "item_id": "demo-保溫瓶-3-3",
+    "name": "【示範】保溫瓶 熱銷款 #303",
+    "keyword": "保溫瓶",
+    "price": 2490,
+    "expected_commission": 78.44,
+    "score": 0.9408,
+    "short_link": "https://s.shopee.tw/示範連結",
+    "text": "想找保溫瓶的可以看看這款👇\n示範 保溫瓶 熱銷款 #303\n評分 4.9｜已售 5,930｜約 NT$2490\n\n#好物推薦 #蝦皮好物\n#分潤連結 透過連結購買我會獲得少量回饋",
+    "reply": "🔗 商品連結在這：https://s.shopee.tw/示範連結\n（價格與庫存以蝦皮頁面為準）",
+    "created_at": "2026-11-03T16:00:32.377Z",
+    "status": "pending"
+  },
+  {
+    "sub_id": "draft2",
+    "item_id": "demo-防曬-3-7",
+    "name": "【示範】防曬 熱銷款 #307",
+    "keyword": "防曬",
+    "price": 2490,
+    "expected_commission": 109.81,
+    "score": 0.9318,
+    "short_link": "https://s.shopee.tw/示範連結",
+    "text": "最近入手的示範 防曬 熱銷款 #307，用了一陣子覺得真的有感 👀\n評分 5｜已售 7,389｜約 NT$2490\n你們平常會選哪種？\n\n#好物推薦 #蝦皮好物\n#分潤連結 透過連結購買我會獲得少量回饋",
+    "reply": "🔗 商品連結在這：https://s.shopee.tw/示範連結\n（價格與庫存以蝦皮頁面為準）",
+    "created_at": "2026-11-03T15:00:32.377Z",
+    "status": "pending"
+  }
+]

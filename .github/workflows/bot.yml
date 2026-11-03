@@ -5,6 +5,9 @@ on:
     - cron: "7 4 * * *"    # 台北 12:07 午休滑手機時段
     - cron: "7 12 * * *"   # 台北 20:07 晚間高峰
     - cron: "37 */6 * * *" # 每 6 小時同步一次成效
+  push:
+    branches: [main]
+    paths: ["queue.yaml", "config.yaml"] # 改了商品佇列就立刻產生草稿
   workflow_dispatch:
     inputs:
       cmd:
@@ -23,11 +26,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-node@v4
         with:
-          python-version: "3.11"
-          cache: pip
-      - run: pip install -r requirements.txt
+          node-version: 22
+          cache: npm
+      - run: npm ci || npm install
       - name: Run bot
         env:
           SHOPEE_APP_ID: ${{ secrets.SHOPEE_APP_ID }}
@@ -36,17 +39,27 @@ jobs:
           THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           DRY_RUN: ${{ vars.DRY_RUN || '1' }}
+          INPUT_CMD: ${{ github.event.inputs.cmd }}
         run: |
-          CMD="${{ github.event.inputs.cmd }}"
+          CMD="$INPUT_CMD"
+          case "$CMD" in ""|select|post|sync|run) ;; *) echo "未知指令 $CMD"; exit 1;; esac
           if [ -z "$CMD" ]; then
-            # 整點發文排程跑 run，其餘只同步
             if [ "${{ github.event.schedule }}" = "37 */6 * * *" ]; then CMD=sync; else CMD=run; fi
           fi
-          python -m bot.main "$CMD"
+          node src/main.js "$CMD"
+      - name: Renew Threads token in Secrets
+        if: hashFiles('.threads-token') != ''
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then echo "未設定 GH_PAT，略過 token 寫回（token 仍會在 60 天後到期）"; exit 0; fi
+          gh secret set THREADS_ACCESS_TOKEN < .threads-token
+          rm .threads-token
       - name: Commit data
         run: |
           git config user.name "shopee-robot"
           git config user.email "shopee-robot@users.noreply.github.com"
           git add dashboard/data
-          git diff --cached --quiet || git commit -m "data: $(date -u +%FT%TZ)"
-          git push
+          git diff --cached --quiet && exit 0
+          git commit -m "data: $(date -u +%FT%TZ)"
+          git pull --rebase -q && git push

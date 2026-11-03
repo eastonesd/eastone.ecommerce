@@ -1,0 +1,34 @@
+name: threads-token
+
+# 從儀表板 token.html 拿到授權碼後，在這裡換成長效 token 並寫進 Secrets。
+# 需要的 Secrets：THREADS_APP_ID、THREADS_APP_SECRET、GH_PAT（可寫 Secrets 的 fine-grained token）
+on:
+  workflow_dispatch:
+    inputs:
+      code:
+        description: "token.html 顯示的授權碼"
+        required: true
+
+jobs:
+  exchange:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci || npm install
+      - name: Exchange code → long-lived token
+        env:
+          THREADS_APP_ID: ${{ secrets.THREADS_APP_ID }}
+          THREADS_APP_SECRET: ${{ secrets.THREADS_APP_SECRET }}
+          CODE: ${{ github.event.inputs.code }}
+        run: node src/tools/threads-token.js "$CODE" --files
+      - name: Save to Secrets
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then echo "::error::請先建立 GH_PAT Secret（見 README）"; exit 1; fi
+          gh secret set THREADS_ACCESS_TOKEN < .threads-token
+          gh secret set THREADS_USER_ID < .threads-user
+          rm -f .threads-token .threads-user
+          echo "✓ 已寫入 THREADS_ACCESS_TOKEN 與 THREADS_USER_ID"
