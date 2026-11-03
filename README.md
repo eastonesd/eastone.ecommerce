@@ -1,123 +1,68 @@
-# 香格里拉：虛實邊界 Shangri-La: Realistic Frontier
+# shopee.robot 🛒🤖
 
-一款用網頁技術（Three.js）打造的沙盒採集 / 建造 / 生存遊戲。電腦、平板、手機都能玩：
+蝦皮分潤 × Threads 自動化機器人：**選品 → 利潤規劃 → 寫文 → 發 Threads → 留言貼分潤連結 → 儀表板統計**。
+全部跑在 GitHub Actions 上，不需要自己的伺服器；儀表板由 GitHub Pages 提供。
 
-- **Windows / macOS / Linux**：打包成桌面 App（Electron）
-- **Android**：打包成原生 App（Capacitor）
-- **iOS**：不用上 App Store，直接用 Safari 打開網址、「加入主畫面」即可像 App 一樣全螢幕啟動（PWA）
-
-<p align="center"><img src="assets/logo/icons/logo-256.png" width="140" /></p>
-
-## 專案架構
+儀表板：https://eastonesd.github.io/shopee.robot/
 
 ```
-shangri-la/
-├─ web/                  ← 遊戲本體（純 HTML + Three.js，唯一的「真相來源」）
-│  ├─ index.html
-│  ├─ manifest.json      ← PWA 設定（讓手機可以「加入主畫面」）
-│  ├─ sw.js              ← Service Worker，離線也能開啟
-│  └─ assets/logo/
-├─ electron/             ← 桌面版外殼（Windows / macOS / Linux）
-├─ mobile/                ← Android 外殼設定（Capacitor）
-├─ assets/logo/          ← Logo 原始檔（SVG）與各尺寸圖示
-└─ .github/workflows/
-   ├─ deploy-pages.yml    ← 自動部署網頁版到 GitHub Pages（產生可分享的網址）
-   ├─ electron-build.yml  ← 自動編譯 Windows/macOS/Linux 安裝檔
-   └─ android-build.yml   ← 自動編譯 Android APK
+┌──────────────┐   productOfferV2    ┌──────────┐  Claude / 模板  ┌────────────┐
+│ 蝦皮聯盟 API  │ ─────────────────▶ │  選品評分  │ ─────────────▶ │  貼文文案   │
+└──────────────┘                     └──────────┘                 └─────┬──────┘
+       ▲  conversionReport（依 subId 歸因）                              │ Threads API
+       │                                                                 ▼
+┌──────┴───────┐  dashboard/data/*.json   ┌──────────┐   主文 + 留言放短連結
+│   GitHub     │ ◀────────────────────── │  sync    │ ◀──────── insights
+│   Pages 儀表板│                          └──────────┘
+└──────────────┘
 ```
 
-之後所有玩法上的修改，只需要編輯 `web/index.html`；桌面版、Android、PWA 都是直接讀取這份網頁內容。
+## 模組
 
----
-
-## 第一步：建立新的 GitHub repo 並拿到能玩的網址
-
-1. 到 GitHub 右上角 **+ → New repository**，取名（例如 `shangri-la-frontier`），
-   **必須是 Public**（免費帳號的 GitHub Pages 只支援公開 repo），不要勾選任何初始化選項。
-2. 把這個資料夾內容 push 上去：
-   ```bash
-   cd shangri-la
-   git init
-   git add .
-   git commit -m "init: shangri-la frontier project"
-   git branch -M main
-   git remote add origin https://github.com/<你的帳號>/<repo名稱>.git
-   git push -u origin main
-   ```
-3. 到 repo 的 **Settings → Pages**，「Build and deployment」→ Source 選 **GitHub Actions**（不是選 branch，這點最容易搞錯，也是網址常常跑不出來的主因）。
-4. 到 **Actions** 頁籤，確認 `Deploy Web (GitHub Pages)` 這個 workflow 有跑起來、變成綠勾勾（第一次 push 後可能要等 1～2 分鐘，或手動點 "Run workflow"）。
-5. 跑完之後，網址會是：
-   ```
-   https://<你的帳號>.github.io/<repo名稱>/
-   ```
-   也可以在 Settings → Pages 頁面上方直接看到這個網址。
-
-**常見「網址跑不出來」的原因**：
-- Pages 的 Source 沒設成 `GitHub Actions`（設成了某個 branch，但我們是用 Actions 部署，兩者要對上）
-- repo 是 **Private**（免費帳號 Pages 需要 Public repo，或升級付費方案）
-- Actions 頁籤裡 workflow 顯示紅叉 → 點進去看錯誤訊息，通常是路徑或權限問題
-- 第一次部署有時候要等幾分鐘才會生效，重新整理看看
-
-## iOS：直接用網頁「加入主畫面」
-
-不用上架 App Store，也不用 Xcode：
-
-1. 用 iPhone/iPad 的 **Safari**（一定要 Safari，其他瀏覽器不支援）打開上面那個 GitHub Pages 網址
-2. 點下方分享按鈕（方框加箭頭）→ **加入主畫面**
-3. 桌面會出現一個有 Logo 的圖示，點開會全螢幕啟動，跟原生 App 體驗很接近，也支援離線開啟（已經內建 Service Worker）
-
-Android 也可以用同樣方式從 Chrome「加入主畫面」，或走下面的原生 App 打包方式上架 Google Play。
-
----
-
-## 本機開發：直接玩網頁版
-
-不需要安裝任何東西，直接用瀏覽器打開 `web/index.html`（需連網載入 Three.js）。
-
-## 打包成 Windows / macOS / Linux 桌面版（Electron）
-
-```bash
-cd electron
-npm install
-npm run start        # 開發模式先跑跑看
-npm run dist:win      # 產生 Windows 安裝檔 (.exe)
-npm run dist:mac      # 產生 macOS 安裝檔 (.dmg)，需在 Mac 上執行
-npm run dist:linux    # 產生 Linux 安裝檔 (.AppImage)
-```
-
-編譯結果會輸出到 `dist-electron/`。Windows 版可以在 Linux/Mac 上跨平台編譯；macOS 版必須在真正的 Mac 上編譯。
-
-## 打包成 Android App（Capacitor）
-
-```bash
-cd mobile
-npm install
-npx cap add android      # 第一次執行，產生 Android 原生專案，記得把產生的 android/ 資料夾 commit 進 git
-npx cap sync              # 之後每次改完 web/index.html，同步一次
-npx cap open android      # 用 Android Studio 打開，簽名後可產生 .apk / .aab 上架 Google Play
-```
-
-## GitHub Actions 自動化
-
-push 到 `main` 之後：
-
-| workflow | 作用 |
+| 檔案 | 功能 |
 |---|---|
-| `deploy-pages.yml` | 自動把 `web/` 部署到 GitHub Pages，產生可分享的網址 |
-| `electron-build.yml` | 自動編譯 Windows / macOS / Linux 安裝檔，可在 Actions 頁籤下載 Artifact |
-| `android-build.yml` | 自動編譯 Android Debug APK（前提：已 commit `mobile/android`） |
+| `bot/shopee_affiliate.py` | 蝦皮聯盟 Open API：商品搜尋、產生帶 subId 的短連結、轉換報表 |
+| `bot/selector.py` | 過濾（佣金率/評分/銷量/價格帶）、預期佣金估算、綜合評分、冷卻期與品類分散 |
+| `bot/copywriter.py` | 用 Claude 寫貼文（沒金鑰自動改用模板），自動附分潤揭露 |
+| `bot/threads_client.py` | Threads 發文、在**自己貼文**下留言放連結、抓曝光/互動、延長 token |
+| `bot/main.py` | CLI：`select` / `post` / `sync` / `run` |
+| `dashboard/` | 靜態儀表板：佣金、成交、曝光、RPM、預估 vs 實際、候選商品池 |
 
-## 橫向 / 響應式支援
+### 利潤規劃邏輯
 
-- 手機直向時會自動顯示「請將裝置轉為橫向」提示
-- 平板／桌面較大螢幕時，UI 面板與搖桿大小會自動調整比例
+```
+單篇預期佣金 = 曝光 × 點擊率 × 轉換率 × 每單佣金
+```
+初期用 `config.yaml` 的預設值；累積 5 篇以上真實數據後，曝光改用最近 30 篇的平均值。
+每篇貼文的短連結帶獨立 `subId`，蝦皮報表回來後能精準算出**每一篇**實際賺了多少，
+儀表板會並列預估與實際，讓你持續調整選品參數。
 
-## Logo
+## 開始使用
 
-暫定 Logo 位於 `assets/logo/logo.svg`，`assets/logo/icons/` 底下已經預先產生好各平台需要的尺寸，包含 Windows `.ico`。
+```bash
+pip install -r requirements.txt
+cp .env.example .env          # 先不填金鑰也能跑
+python -m bot.main run        # DRY_RUN：用示範資料走完整流程，不會真的發文
+python -m pytest -q
+python -m http.server -d dashboard   # 本機看儀表板 → http://localhost:8000
+```
 
-## 待辦
+### 上線步驟
 
-- [ ] Windows/Android 正式簽名憑證（上架 Microsoft Store / Google Play 用）
-- [ ] 正式 Logo 設計（目前是暫定版本）
-- [ ] 遊戲內容擴充
+1. **蝦皮聯盟行銷**：在 affiliate.shopee.tw 申請成為推廣者，再申請 Open API 取得 `App ID` / `Secret`。
+2. **Threads API**：Meta for Developers 建立 App → 加入 Threads 使用案例 → 授權 `threads_basic`、`threads_content_publish`、`threads_manage_insights`、`threads_manage_replies` → 換成長效 token。
+3. GitHub repo → Settings → Secrets and variables → Actions：
+   - Secrets：`SHOPEE_APP_ID`、`SHOPEE_SECRET`、`THREADS_ACCESS_TOKEN`、`THREADS_USER_ID`、（選填）`ANTHROPIC_API_KEY`
+   - Variables：`DRY_RUN` = `0`（確認一切正常後再改）
+4. Settings → Pages → Source 選 **GitHub Actions**。
+5. Actions → `bot` → Run workflow，先用 `select` 確認選品結果合理。
+
+排程：每天台北 12:07、20:07 發文（每次最多 2 篇），每 6 小時同步成效。
+
+## 規範與風險（請務必看）
+
+- **揭露**：每篇自動附上分潤揭露文字。依公平會對網路推薦行銷的規範，請勿移除。
+- **不對別人的貼文留言**：本專案只在自己貼文下留言放連結。到他人貼文底下自動留言屬於垃圾訊息，會被限流或停權。
+- **發文頻率**：預設每天 4 篇以內，連發間隔 20 秒。新帳號建議先手動經營一陣子，再逐步提高。
+- **API 欄位**：蝦皮 GraphQL 欄位名稱若有異動，只需修改 `bot/shopee_affiliate.py`。
+- Threads 長效 token 60 天到期，機器人每次執行會自動延長；若長期未執行導致過期，需重新產生並更新 Secret。

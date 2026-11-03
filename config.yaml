@@ -1,0 +1,38 @@
+# ── shopee.robot 設定檔 ─────────────────────────────────────────
+# 金鑰一律放 .env 或 GitHub Secrets，這裡只放策略參數。
+
+selection:
+  keywords:            # 選品關鍵字（輪流搜尋）
+    - 保溫瓶
+    - 行動電源
+    - 收納
+    - 防曬
+    - 藍牙耳機
+  pages_per_keyword: 2
+  min_commission_rate: 0.04   # 低於 4% 佣金不考慮
+  min_rating: 4.6
+  min_sales: 100
+  price_range: [150, 3000]    # 太便宜不划算、太貴轉換差
+  repost_cooldown_days: 14    # 同商品 14 天內不重複推
+
+profit:
+  est_click_rate: 0.012       # 預估：貼文曝光 → 點擊
+  est_conversion_rate: 0.035  # 預估：點擊 → 成交
+  est_views_per_post: 1500    # 尚無歷史數據時的預設曝光
+  weights:                    # 綜合分數權重
+    expected_commission: 0.5
+    sales_momentum: 0.25
+    rating: 0.15
+    discount: 0.10
+
+posting:
+  posts_per_run: 2            # 每次執行最多發幾篇（避免洗版）
+  link_in_reply: true         # 連結放第一則留言，主文保持乾淨
+  disclosure: "#分潤連結 透過連結購買我會獲得少量回饋"
+  hashtags: ["好物推薦", "蝦皮好物"]
+  max_chars: 480              # Threads 上限 500
+
+copywriter:
+  provider: claude            # claude | template（沒有金鑰會自動退回 template）
+  model: claude-haiku-5-5
+  tone: 口語、真誠、像朋友分享，不浮誇，不保證效果

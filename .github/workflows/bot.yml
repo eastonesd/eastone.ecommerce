@@ -1,0 +1,52 @@
+name: bot
+
+on:
+  schedule:
+    - cron: "7 4 * * *"    # 台北 12:07 午休滑手機時段
+    - cron: "7 12 * * *"   # 台北 20:07 晚間高峰
+    - cron: "37 */6 * * *" # 每 6 小時同步一次成效
+  workflow_dispatch:
+    inputs:
+      cmd:
+        description: "select / post / sync / run"
+        default: run
+
+permissions:
+  contents: write
+
+concurrency:
+  group: bot
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Run bot
+        env:
+          SHOPEE_APP_ID: ${{ secrets.SHOPEE_APP_ID }}
+          SHOPEE_SECRET: ${{ secrets.SHOPEE_SECRET }}
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          THREADS_USER_ID: ${{ secrets.THREADS_USER_ID }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DRY_RUN: ${{ vars.DRY_RUN || '1' }}
+        run: |
+          CMD="${{ github.event.inputs.cmd }}"
+          if [ -z "$CMD" ]; then
+            # 整點發文排程跑 run，其餘只同步
+            if [ "${{ github.event.schedule }}" = "37 */6 * * *" ]; then CMD=sync; else CMD=run; fi
+          fi
+          python -m bot.main "$CMD"
+      - name: Commit data
+        run: |
+          git config user.name "shopee-robot"
+          git config user.email "shopee-robot@users.noreply.github.com"
+          git add dashboard/data
+          git diff --cached --quiet || git commit -m "data: $(date -u +%FT%TZ)"
+          git push
