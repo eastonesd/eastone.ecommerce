@@ -1,5 +1,5 @@
 // 外殼離線可用；資料一律先抓網路，斷線才用快取
-const CACHE = "shopee-robot-v2";
+const CACHE = "shopee-robot-v3";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png"];
 
 self.addEventListener("install", (e) => {
