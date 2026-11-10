@@ -1,9 +1,10 @@
 /** 選品 + 利潤規劃：過濾 → 預期佣金 → 綜合評分 → 排序（含冷卻期、品類分散） */
 
 export function passesFilters(p, rules) {
+  // 手動佇列（queue.yaml／LINE 送來的）是使用者親自挑的：不套用自動選品的門檻
+  if (p.manual) return true;
   const [lo, hi] = rules.price_range;
-  // 手動佇列的商品若沒填某欄位，就不拿那個欄位卡它
-  const ok = (v, test) => (p.manual && !v ? true : test(v));
+  const ok = (v, test) => test(v);
   return (
     ok(p.commission_rate, (v) => v >= rules.min_commission_rate) &&
     ok(p.rating, (v) => v >= rules.min_rating) &&

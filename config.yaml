@@ -9,7 +9,7 @@ selection:
     - 防曬
     - 藍牙耳機
   pages_per_keyword: 2
-  min_commission_rate: 0.04   # 低於 4% 佣金不考慮
+  min_commission_rate: 0.04   # 低於 4% 佣金不考慮（以下門檻只用於自動搜尋；queue.yaml 手動挑的商品不受限）
   min_rating: 4.6
   min_sales: 100
   price_range: [150, 3000]    # 太便宜不划算、太貴轉換差
