@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-10T08:54:30.000Z",
+  "updated_at": "2026-11-10T08:55:25.971Z",
   "pool_size": 2,
   "top": [
     {
@@ -18,6 +18,23 @@
       "manual": true,
       "expected_commission": 11.91,
       "score": 0.5041
+    },
+    {
+      "item_id": "q-2LZl2tIlgv",
+      "name": "橘子工坊洗碗精",
+      "shop": "",
+      "price": 107,
+      "discount": 0,
+      "commission_rate": 0.035,
+      "commission": 3.7450000000000006,
+      "sales": 0,
+      "rating": 0,
+      "note": "又香又不傷手，清潔力也是妥妥的，婆婆媽媽們一定不要忘記愛護自己的手><",
+      "keyword": "居家生活",
+      "link": "https://s.shopee.tw/2LZl2tIlgv",
+      "manual": true,
+      "expected_commission": 2.36,
+      "score": 0.0986
     }
   ]
 }
