@@ -3,7 +3,7 @@
 蝦皮分潤 × Threads 自動化機器人：**選品 → 利潤規劃 → 寫文 → 發 Threads → 留言貼分潤連結 → 儀表板統計**。
 全部用 JavaScript（Node.js）寫成：機器人在 GitHub Actions 上定時執行，儀表板是可以安裝到手機和電腦的 App（PWA）。
 
-📱 儀表板：https://eastonesd.github.io/shopee.robot/
+📱 儀表板：https://eastonesd.github.io/eastone.ecommerce/
 - iPhone：用 Safari 開啟 → 分享 → **加入主畫面**
 - Android / 電腦：用 Chrome 開啟 → 網址列旁的 **安裝**，或頁面右上角的「安裝 App」按鈕
 
