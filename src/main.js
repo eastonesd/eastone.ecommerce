@@ -144,7 +144,7 @@ async function main() {
   console.log(`[shopee.robot] 選品=${modes.shopee}　發布=${modes.threads}`);
 
   const source = makeSource(modes.shopee);
-  const threads = env("THREADS_ACCESS_TOKEN") ? new Threads(env("THREADS_ACCESS_TOKEN"), env("THREADS_USER_ID", "me")) : null;
+  const threads = env("THREADS_ACCESS_TOKEN") ? new Threads(env("THREADS_ACCESS_TOKEN")) : null;
 
   if (modes.shopee === "demo" && cmd !== "select") {
     console.log("尚未設定蝦皮 API，queue.yaml 也是空的 → 請先在 queue.yaml 加入商品。（看示範：npm run demo）");

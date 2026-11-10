@@ -22,7 +22,10 @@ export async function exchange(code) {
     method: "POST",
     body: new URLSearchParams({ client_id, client_secret, code, grant_type: "authorization_code", redirect_uri: REDIRECT_URI }),
   });
-  const short = await r1.json();
+  const raw1 = await r1.text();
+  const short = JSON.parse(raw1 || "{}");
+  // user_id 是 17 位數，用原始字串取，避免 JSON.parse 的精度誤差
+  short.user_id = raw1.match(/"user_id"\s*:\s*"?(\d+)/)?.[1] ?? short.user_id;
   if (!r1.ok) throw new Error(`換短期 token 失敗：${short.error?.message || r1.status}（授權碼只能用一次、1 小時內有效）\n` +
     `  本次使用 App ID 末四碼 ${client_id.slice(-4)}、回呼網址 ${REDIRECT_URI}\n` +
     `  請確認 token.html 輸入的 App ID 末四碼相同，且兩者都是「Threads 設定」頁面裡的 Threads 應用程式編號／密鑰`);

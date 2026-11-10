@@ -7,9 +7,11 @@ const METRICS = "views,likes,replies,reposts,quotes";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 export class Threads {
-  constructor(token, userId = "me") {
+  // 一律用 "me"：Threads 的使用者 ID 有 17 位數，超過 JavaScript 數字精度，
+  // 經過 JSON.parse 後尾數會被四捨五入，變成「不存在的物件」（Threads 400）。
+  constructor(token) {
     this.token = token;
-    this.userId = userId || "me";
+    this.userId = "me";
   }
 
   async #req(method, path, params = {}) {
