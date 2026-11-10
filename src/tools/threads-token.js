@@ -9,7 +9,7 @@
 import { writeFileSync } from "node:fs";
 import { env } from "../config.js";
 
-export const REDIRECT_URI = env("THREADS_REDIRECT_URI", "https://eastonesd.github.io/shopee.robot/token.html");
+export const REDIRECT_URI = env("THREADS_REDIRECT_URI", "https://eastonesd.github.io/eastone.ecommerce/token.html");
 
 export async function exchange(code) {
   const client_id = env("THREADS_APP_ID");

@@ -44,13 +44,13 @@ Meta 開發者帳號只能用 Facebook 登入。你可以另外開一個 Faceboo
 
 1. developers.facebook.com → 建立應用程式 → 使用案例選 **存取 Threads API**。
 2. **使用案例 → 自訂 → 權限**，加入 `threads_basic`、`threads_content_publish`、`threads_manage_replies`、`threads_manage_insights`。
-3. **Threads 設定 → 重新導向回呼網址** 填入：`https://eastonesd.github.io/shopee.robot/token.html`
+3. **Threads 設定 → 重新導向回呼網址** 填入：`https://eastonesd.github.io/eastone.ecommerce/token.html`
 4. **應用程式角色 → 角色 → 新增人員 → Threads 測試人員**，填你的 Threads 帳號。
    再到 Threads App → 設定 → 帳號 → **網站權限** 接受邀請（最常漏掉的一步）。
 5. 取得 token：
    - 把 Threads App ID / Secret 存進 Secrets：`THREADS_APP_ID`、`THREADS_APP_SECRET`
    - 建立 `GH_PAT`（見下方），讓機器人能自己更新 token
-   - 開啟 [token.html](https://eastonesd.github.io/shopee.robot/token.html) → 輸入 App ID → 授權 → 複製授權碼
+   - 開啟 [token.html](https://eastonesd.github.io/eastone.ecommerce/token.html) → 輸入 App ID → 授權 → 複製授權碼
    - repo → **Actions → threads-token → Run workflow** → 貼上授權碼 → 完成後 token 會自動寫進 Secrets
 6. 確認一切正常後，到 **Settings → Variables** 新增 `DRY_RUN` = `0`，機器人才會真的發文。
 
