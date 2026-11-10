@@ -23,7 +23,9 @@ export async function exchange(code) {
     body: new URLSearchParams({ client_id, client_secret, code, grant_type: "authorization_code", redirect_uri: REDIRECT_URI }),
   });
   const short = await r1.json();
-  if (!r1.ok) throw new Error(`換短期 token 失敗：${short.error?.message || r1.status}（授權碼只能用一次、1 小時內有效）`);
+  if (!r1.ok) throw new Error(`換短期 token 失敗：${short.error?.message || r1.status}（授權碼只能用一次、1 小時內有效）\n` +
+    `  本次使用 App ID 末四碼 ${client_id.slice(-4)}、回呼網址 ${REDIRECT_URI}\n` +
+    `  請確認 token.html 輸入的 App ID 末四碼相同，且兩者都是「Threads 設定」頁面裡的 Threads 應用程式編號／密鑰`);
 
   // 2) 短期 → 長效 token（60 天）
   const url = new URL("https://graph.threads.net/access_token");
