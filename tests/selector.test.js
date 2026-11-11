@@ -1,7 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { loadConfig } from "../src/config.js";
-import { passesFilters, expectedCommission, pick } from "../src/selector.js";
+import { passesFilters, expectedCommission, pick, performanceFactor } from "../src/selector.js";
+import { pickTemplate } from "../src/copywriter.js";
 import { attribute } from "../src/main.js";
 import { QueueSource } from "../src/shopee.js";
 
@@ -30,6 +31,27 @@ test("冷卻期與品類分散", () => {
   const pool = [item({ item_id: "1" }), item({ item_id: "2" }), item({ item_id: "3", keyword: "b" })];
   const ids = pick(pool, cfg, [{ item_id: "3", posted_at: new Date().toISOString() }]).map((p) => p.item_id);
   assert.deepEqual(ids, ["1"]);
+});
+
+test("舊品重推依曝光表現調整排序", () => {
+  const ago = new Date(Date.now() - 20 * 864e5).toISOString(); // 已過冷卻期
+  const hist = [
+    { item_id: "hot", posted_at: ago, metrics: { views: 900 } },
+    { item_id: "cold", posted_at: ago, metrics: { views: 100 } },
+  ];
+  assert.equal(performanceFactor("hot", hist), 1.5);
+  assert.equal(performanceFactor("cold", hist), 0.5);
+  assert.equal(performanceFactor("new", hist), 1);
+  const pool = [item({ item_id: "cold", keyword: "a" }), item({ item_id: "hot", keyword: "b" })];
+  assert.equal(pick(pool, cfg, hist)[0].item_id, "hot");
+});
+
+test("範本重推時避開上次的開頭", () => {
+  const p = item({ name: "保溫瓶" });
+  for (let i = 0; i < 20; i++) {
+    const prev = pickTemplate(p);
+    assert.notEqual(pickTemplate({ ...p, previous_texts: [prev] }).slice(0, 8), prev.slice(0, 8));
+  }
 });
 
 test("subId 佣金歸因", () => {

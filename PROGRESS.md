@@ -60,9 +60,16 @@ A.R.T.H.U.R. 的 arthur-hub 每 10 分鐘讀本 repo：
 3. `dashboard/data/meta.json` 的 `total_posts`、`total_drafts`、`total_commission`；`conversions.json` 的 `purchase_time`、`commission`。
 4. `dashboard/data/posts.json` 每筆至少有 `name`、`permalink`、`text`、`price`、`commission_rate`，且**依時間順序追加**。
 
+## 舊品重推（2026-11-12 新增）
+
+- `queue.yaml` 的商品發完**不會被移除**，過了 14 天冷卻（`repost_cooldown_days`）自動重新上場。
+- 重推時 AI 文案會看到舊文，被要求換切入角度、開頭與句型不得重複；沒有 AI 時範本也會避開上次的開頭（`src/copywriter.js`）。
+- 排序依實際曝光加權：該商品平均曝光 ÷ 全部貼文平均曝光，限制 0.5～1.5 倍（`src/selector.js` `performanceFactor`）。
+- 沒有改動上方任何契約欄位。
+
 ## 待辦／觀察到的問題
 
 1. **佇列空了**：兩個商品都發過（同商品 14 天冷卻），11/11 的三個時段都沒有東西可發。需要主人用 `/ec` 補貨，或接上蝦皮聯盟 API 自動選品。
 2. **蝦皮聯盟 API 還沒接**：`meta.json` 的 `modes.shopee` 是 `queue`，佣金與成交都還是 0、`conversions.json` 沒有資料。有 API 後才能自動選品與對帳。
-3. 本機 `npm test` 曾有一個 selector 測試失敗（CI 上通過），可順手查一下是否與 `passesFilters` 的手動商品改動有關。
+3. ~~本機 `npm test` selector 測試失敗~~：2026-11-12 重跑 7 項全數通過，已無此問題。
 4. 主人看不懂英文：回覆、文件、commit 訊息都用繁體中文。

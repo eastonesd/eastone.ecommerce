@@ -59,7 +59,10 @@ export async function post(cfg, modes, source, threads) {
   for (const [i, p] of picked.entries()) {
     const sub_id = `t${stamp()}${i}`;
     const link = await source.shortLink(p.link, [sub_id, "threads"]);
-    const text = await writePost(p, cfg);
+    // 舊品重推：把之前的文案交給文案模組，請它換角度
+    const previous_texts = posts.filter((x) => x.item_id === p.item_id).map((x) => x.text).filter(Boolean);
+    if (previous_texts.length) console.log(`[post] 舊品重推（第 ${previous_texts.length + 1} 次）：${p.name}`);
+    const text = await writePost({ ...p, previous_texts }, cfg);
     const reply = writeReply(link);
     const base = {
       sub_id, item_id: p.item_id, name: p.name, keyword: p.keyword, price: p.price,

@@ -45,11 +45,30 @@ export function rank(pool, cfg, views) {
     .sort((a, b) => b.score - a.score);
 }
 
+/**
+ * 舊品重推依實際表現加減分：該商品過去平均曝光 ÷ 全部貼文平均曝光，限制在 0.5～1.5 倍。
+ * 曝光數還沒回來（或樣本太少）的商品不調整。
+ */
+export function performanceFactor(itemId, history) {
+  const views = (h) => h.metrics?.views || 0;
+  const withViews = history.filter((h) => views(h) > 0);
+  const mine = withViews.filter((h) => h.item_id === itemId);
+  if (!mine.length || withViews.length < 2) return 1;
+  const avg = (a) => a.reduce((s, h) => s + views(h), 0) / a.length;
+  return Math.min(1.5, Math.max(0.5, avg(mine) / avg(withViews)));
+}
+
 export function pick(pool, cfg, history, views) {
   const skip = recentlyPosted(history, cfg.selection.repost_cooldown_days);
   const picked = [];
   const usedKw = new Set();
-  for (const p of rank(pool, cfg, views)) {
+  const ranked = rank(pool, cfg, views)
+    .map((p) => {
+      const f = performanceFactor(p.item_id, history);
+      return f === 1 ? p : { ...p, score: round(p.score * f, 4), perf_factor: round(f, 2) };
+    })
+    .sort((a, b) => b.score - a.score);
+  for (const p of ranked) {
     if (skip.has(p.item_id) || usedKw.has(p.keyword)) continue;
     picked.push(p);
     usedKw.add(p.keyword);

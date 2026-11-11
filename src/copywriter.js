@@ -11,7 +11,18 @@ const prompt = (p, tone) => `你是台灣 Threads 上的生活好物分享者。
 商品：${p.name}
 ${p.price ? `價格：NT$${Math.round(p.price)}　` : ""}${p.rating ? `評分：${p.rating}　` : ""}${p.sales ? `已售：${p.sales}` : ""}
 ${p.note ? `賣點：${p.note}` : ""}
-只輸出貼文本文。`;
+${previousBlock(p)}只輸出貼文本文。`;
+
+/** 舊品重推：把之前發過的文給 AI 看，要求換角度，避免被當成重複內容 */
+function previousBlock(p) {
+  const prev = (p.previous_texts || []).slice(-2);
+  if (!prev.length) return "";
+  const angles = "使用情境、解決的小困擾、送禮、和同類商品比較、季節或節日、開箱感想";
+  return `這個商品之前發過，以下是舊文：
+${prev.map((t, i) => `【舊文${i + 1}】${t.split("\n#")[0].trim()}`).join("\n")}
+這次請換一個切入角度（例如：${angles}），開頭第一句和句型都不要和舊文相同。
+`;
+}
 
 const short = (name) => name.replace(/[【】\[\]()（）]/g, " ").trim().slice(0, 24);
 
@@ -20,6 +31,14 @@ const TEMPLATES = [
   (p) => `幫大家省點踩雷時間：${short(p.name)}\n${stats(p)}\n有用過的來說說心得？`,
   (p) => `想找${p.keyword || "好用小物"}的可以看看這款👇\n${short(p.name)}\n${stats(p)}`,
 ];
+
+/** 範本：舊品重推時避開上次用過的開頭 */
+export function pickTemplate(p) {
+  const used = (p.previous_texts || []).map((t) => t.slice(0, 8));
+  const fresh = TEMPLATES.map((f) => f(p)).filter((t) => !used.includes(t.slice(0, 8)));
+  const pool = fresh.length ? fresh : TEMPLATES.map((f) => f(p));
+  return pool[Math.floor(Math.random() * pool.length)];
+}
 
 function stats(p) {
   const s = [];
@@ -40,7 +59,7 @@ export async function writePost(p, cfg) {
       console.log(`[copywriter] Claude 失敗，改用模板：${e.message}`);
     }
   }
-  body ||= TEMPLATES[Math.floor(Math.random() * TEMPLATES.length)](p);
+  body ||= pickTemplate(p);
   const tags = posting.hashtags.map((t) => `#${t}`).join(" ");
   return [body, "", tags, posting.disclosure].filter((x, i) => i < 3 || x).join("\n").trim().slice(0, posting.max_chars);
 }
