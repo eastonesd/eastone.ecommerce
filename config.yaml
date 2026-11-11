@@ -28,7 +28,7 @@ profit:
 posting:
   posts_per_run: 2            # 每次執行最多發幾篇（避免洗版）
   link_in_reply: true         # 連結放第一則留言，主文保持乾淨
-  disclosure: "#分潤連結 透過連結購買我會獲得少量回饋"
+  disclosure: ""               # 主文最後一行的揭露文字；留空 = 不加
   hashtags: ["好物推薦", "蝦皮好物"]
   max_chars: 480              # Threads 上限 500
 

@@ -42,10 +42,10 @@ export async function writePost(p, cfg) {
   }
   body ||= TEMPLATES[Math.floor(Math.random() * TEMPLATES.length)](p);
   const tags = posting.hashtags.map((t) => `#${t}`).join(" ");
-  return `${body}\n\n${tags}\n${posting.disclosure}`.slice(0, posting.max_chars);
+  return [body, "", tags, posting.disclosure].filter((x, i) => i < 3 || x).join("\n").trim().slice(0, posting.max_chars);
 }
 
-export const writeReply = (link) => `🔗 商品連結在這：${link}\n（價格與庫存以蝦皮頁面為準）`;
+export const writeReply = (link) => `🔗 商品連結在這：${link}`;
 
 async function claude(p, cw) {
   const r = await fetch("https://api.anthropic.com/v1/messages", {
