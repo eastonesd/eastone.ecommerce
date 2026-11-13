@@ -2,11 +2,14 @@ name: 帶貨片發布
 
 # 亞瑟整理、葉里克先生核准的發布包（promo/<slug>.json）→ Threads 影片貼文＋留言連結
 on:
+  schedule:
+    - cron: "35 4 * * *"    # 台北 12:35（發布時段 12:30）
+    - cron: "35 12 * * *"   # 台北 20:35（發布時段 20:30）
   workflow_dispatch:
     inputs:
       slug:
-        description: 發布包代號（promo/<slug>.json）
-        required: true
+        description: 發布包代號（promo/<slug>.json）；留空＝發下一則到時間的
+        required: false
       dry:
         description: 只試跑不發布
         type: boolean
@@ -32,7 +35,9 @@ jobs:
       - name: 發布
         env:
           THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
-        run: node src/tools/promo-post.js "promo/${{ inputs.slug }}.json" ${{ inputs.dry && '--dry' || '' }}
+        run: |
+          if [ -n "${{ inputs.slug }}" ]; then node src/tools/promo-post.js "promo/${{ inputs.slug }}.json" ${{ inputs.dry && '--dry' || '' }}
+          else node src/tools/promo-post.js --due; fi
       - name: 記錄
         if: ${{ !inputs.dry }}
         run: |
@@ -40,5 +45,5 @@ jobs:
           git config user.email "shopee-robot@users.noreply.github.com"
           git add dashboard/data
           git diff --cached --quiet && exit 0
-          git commit -m "promo: ${{ inputs.slug }}"
+          git commit -m "promo: ${{ inputs.slug || 'scheduled' }}"
           git pull --rebase -q && git push

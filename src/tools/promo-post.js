@@ -7,11 +7,22 @@
  *
  * 用法：node src/tools/promo-post.js promo/<slug>.json [--dry]
  */
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { Threads } from "../threads.js";
 import * as store from "../storage.js";
 
-const [file, flag] = process.argv.slice(2);
+const [arg, flag] = process.argv.slice(2);
+// --due：挑一則已核准、發布時間已到、還沒發過的發布包（排程用，每次最多發一則）
+let file = arg;
+if (arg === "--due") {
+  const posted = new Set(store.load("posts").map((p) => p.promo).filter(Boolean));
+  const due = readdirSync("promo").filter((f) => f.endsWith(".json"))
+    .map((f) => ({ f: `promo/${f}`, p: JSON.parse(readFileSync(`promo/${f}`, "utf8")) }))
+    .filter(({ p }) => p.approved_at && p.post_at && Date.parse(p.post_at) <= Date.now() && !posted.has(p.slug))
+    .sort((a, b) => Date.parse(a.p.post_at) - Date.parse(b.p.post_at));
+  if (!due.length) { console.log("沒有到時間的帶貨片"); process.exit(0); }
+  file = due[0].f;
+}
 const pkg = JSON.parse(readFileSync(file, "utf8"));
 for (const k of ["account", "video_url", "text", "reply"]) if (!pkg[k]) throw new Error(`發布包缺少 ${k}`);
 if (!pkg.approved_at && flag !== "--dry") throw new Error("發布包還沒有核准紀錄（approved_at），只能試跑");
