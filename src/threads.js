@@ -30,6 +30,24 @@ export class Threads {
     return (await this.#req("POST", `${this.userId}/threads_publish`, { creation_id })).id;
   }
 
+  /** 影片貼文：video_url 要是公開可下載的網址；影片要先在 Threads 處理完（FINISHED）才能發布 */
+  async publishVideo(text, videoUrl, replyTo) {
+    const params = { media_type: "VIDEO", video_url: videoUrl, text, ...(replyTo && { reply_to_id: replyTo }) };
+    const { id: creation_id } = await this.#req("POST", `${this.userId}/threads`, params);
+    for (let i = 0; i < 60; i++) {           // 最多等 5 分鐘
+      await sleep(5000);
+      const s = await this.#req("GET", creation_id, { fields: "status,error_message" });
+      if (s.status === "FINISHED") break;
+      if (s.status === "ERROR" || s.status === "EXPIRED") throw new Error(`Threads 影片處理失敗：${s.error_message || s.status}`);
+      if (i === 59) throw new Error("Threads 影片處理逾時");
+    }
+    return (await this.#req("POST", `${this.userId}/threads_publish`, { creation_id })).id;
+  }
+
+  async username() {
+    return (await this.#req("GET", this.userId, { fields: "username" })).username || "";
+  }
+
   async permalink(id) {
     try {
       return (await this.#req("GET", id, { fields: "permalink" })).permalink || "";
