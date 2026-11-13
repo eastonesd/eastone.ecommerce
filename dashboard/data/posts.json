@@ -48,5 +48,26 @@
     },
     "orders": 0,
     "commission": 0
+  },
+  {
+    "sub_id": "promo-eyemask-quiet",
+    "promo": "eyemask-quiet",
+    "item_id": "promo-eyemask-quiet",
+    "name": "靚Quiet 立體記憶綿眼罩",
+    "keyword": "眼罩",
+    "price": 294,
+    "commission_rate": 0,
+    "expected_commission": 0,
+    "score": 0,
+    "short_link": "https://s.shopee.tw/1LhJMIpNRQ",
+    "text": "眼罩最常被抱怨的，就是壓眼睛😮‍💨\n這款是立體設計的記憶棉眼罩：眼罩貼合在眼睛四周，眼睛在裡面可以自在活動；邊緣沿著臉型加厚，加強遮光；寬版頭帶，好調整、不夾頭髮。\n蝦皮上已經賣出 4 萬多個，評價 5.0。\n你睡覺是不是也要全黑才睡得著？\n\n#眼罩 #睡眠好物 #午睡",
+    "video": "https://github.com/eastonesd/eastone.saga/releases/download/promo-eyemask-quiet/eyemask-quiet.mp4",
+    "post_id": "18128026999918401",
+    "reply_id": "18079671224462800",
+    "permalink": "https://www.threads.com/@ambition._6268/post/DfsciXTKv_k",
+    "posted_at": "2026-11-13T20:04:42.543Z",
+    "metrics": {},
+    "orders": 0,
+    "commission": 0
   }
 ]
