@@ -2,6 +2,10 @@ name: 帶貨片發布
 
 # 亞瑟整理、葉里克先生核准的發布包（promo/<slug>.json）→ Threads 影片貼文＋留言連結
 on:
+  # 發布時段由 Supabase 排程準時寫入 promo/.tick 觸發（GitHub 自己的定時器常延誤），下面的 schedule 只當備援
+  push:
+    branches: [main]
+    paths: ["promo/.tick"]
   schedule:
     - cron: "35 4 * * *"    # 台北 12:35（發布時段 12:30）
     - cron: "35 12 * * *"   # 台北 20:35（發布時段 20:30）
