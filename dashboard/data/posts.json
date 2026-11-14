@@ -67,7 +67,7 @@
     "permalink": "https://www.threads.com/@ambition._6268/post/DfsciXTKv_k",
     "posted_at": "2026-11-13T20:04:42.543Z",
     "metrics": {
-      "views": 20,
+      "views": 30,
       "likes": 0,
       "replies": 1,
       "reposts": 0,
@@ -93,7 +93,13 @@
     "reply_id": "17915936067507388",
     "permalink": "https://www.threads.com/@ambition._6268/post/DftdWs1qT2G",
     "posted_at": "2026-11-14T05:31:04.315Z",
-    "metrics": {},
+    "metrics": {
+      "views": 10,
+      "likes": 0,
+      "replies": 1,
+      "reposts": 0,
+      "quotes": 0
+    },
     "orders": 0,
     "commission": 0
   }
