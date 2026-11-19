@@ -1,4 +1,4 @@
-# shopee.robot 🛒🤖
+# 東石電商 🛒🤖
 
 蝦皮分潤 × Threads 自動化機器人：**選品 → 利潤規劃 → 寫文 → 發 Threads → 留言貼分潤連結 → 儀表板統計**。
 全部用 JavaScript（Node.js）寫成：機器人在 GitHub Actions 上定時執行，儀表板是可以安裝到手機和電腦的 App（PWA）。

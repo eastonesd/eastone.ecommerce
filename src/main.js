@@ -144,7 +144,7 @@ async function main() {
   const cmd = process.argv[2] || "run";
   const cfg = loadConfig();
   const modes = detectModes();
-  console.log(`[shopee.robot] 選品=${modes.shopee}　發布=${modes.threads}`);
+  console.log(`[東石電商] 選品=${modes.shopee}　發布=${modes.threads}`);
 
   const source = makeSource(modes.shopee);
   const threads = env("THREADS_ACCESS_TOKEN") ? new Threads(env("THREADS_ACCESS_TOKEN")) : null;
