@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-24T14:40:30.687Z",
+  "updated_at": "2026-11-24T21:00:30.808Z",
   "pool_size": 2,
   "top": [
     {
@@ -16,8 +16,8 @@
       "keyword": "保護貼",
       "link": "https://s.shopee.tw/4qH5tkNNNz",
       "manual": true,
-      "expected_commission": 11.91,
-      "score": 0.5041
+      "expected_commission": 0.41,
+      "score": 0.3891
     },
     {
       "item_id": "q-2LZl2tIlgv",
@@ -33,8 +33,8 @@
       "keyword": "居家生活",
       "link": "https://s.shopee.tw/2LZl2tIlgv",
       "manual": true,
-      "expected_commission": 2.36,
-      "score": 0.0986
+      "expected_commission": 0.08,
+      "score": 0.0758
     }
   ]
 }
