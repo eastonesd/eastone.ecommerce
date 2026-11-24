@@ -14,16 +14,15 @@ permissions:
   pages: write
   id-token: write
 
+# 不中途取消：每次部署都用 main 最新內容，排隊依序跑完即可
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
-  deploy:
+  # 第一步：打包儀表板（獨立成一個 job，讓檔案有時間在 GitHub 端就緒）
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,5 +31,28 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dashboard
-      - id: deploy
+
+  # 第二步：部署。GitHub Pages 偶爾會回「找不到檔案／稍後再試」，最多自動重試 3 次
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy3.outputs.page_url || steps.deploy2.outputs.page_url || steps.deploy1.outputs.page_url }}
+    steps:
+      - id: deploy1
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - if: steps.deploy1.outcome == 'failure'
+        run: sleep 30
+      - id: deploy2
+        if: steps.deploy1.outcome == 'failure'
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - if: steps.deploy1.outcome == 'failure' && steps.deploy2.outcome == 'failure'
+        run: sleep 90
+      - id: deploy3
+        if: steps.deploy1.outcome == 'failure' && steps.deploy2.outcome == 'failure'
         uses: actions/deploy-pages@v4
